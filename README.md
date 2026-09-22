@@ -36,3 +36,11 @@ yang menggunakan asset JSON, FutureBuilder, ListView, dan reusable widget.
 - Menampilkan status mata kuliah
 - Menggunakan FutureBuilder untuk proses asynchronous
 - Menggunakan ListView untuk daftar data
+
+
+## Cara Menjalankan Project
+
+1. Pastikan Flutter sudah terpasang.
+2. Jalankan `flutter pub get`.
+3. Hubungkan emulator atau perangkat Android.
+4. Jalankan aplikasi dengan `flutter run`.
