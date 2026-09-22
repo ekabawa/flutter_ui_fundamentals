@@ -15,3 +15,24 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+
+## Identitas Mahasiswa
+
+- NIM: 2415051008
+- Nama: I Putu Eka Bawa Utama
+
+## Learning Dashboard
+
+Project ini merupakan implementasi praktikum Flutter UI Fundamentals
+yang menggunakan asset JSON, FutureBuilder, ListView, dan reusable widget.
+
+### Fitur
+
+- Menampilkan identitas mahasiswa
+- Membaca data dari JSON statik
+- Menampilkan daftar mata kuliah
+- Menampilkan status mata kuliah
+- Menggunakan FutureBuilder untuk proses asynchronous
+- Menggunakan ListView untuk daftar data
