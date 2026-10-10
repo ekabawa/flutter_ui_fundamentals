@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../models/course.dart';
 import 'course_detail_page.dart';
+import '../widgets/course_card.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -162,7 +163,9 @@ class CourseList extends StatelessWidget {
     required this.onCourseTap,
   });
 
-  @override
+  
+
+@override
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -171,28 +174,13 @@ class CourseList extends StatelessWidget {
         final course = courses[index];
         final isFavorite = favorites.contains(course.code);
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ListTile(
-            leading: const Icon(Icons.school),
-            title: Text(
-              course.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(
-              '${course.code} • ${course.credits} SKS',
-            ),
-            trailing: IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : null,
-              ),
-              onPressed: () => onFavoriteChanged(course.code),
-            ),
-            onTap: () => onCourseTap(course),
-          ),
+        return CourseCard(
+          course: course,
+          isFavorite: isFavorite,
+          onFavoriteChanged: () {
+            onFavoriteChanged(course.code);
+          },
+          onTap: () => onCourseTap(course),
         );
       },
     );

@@ -1,23 +1,20 @@
+
 import 'package:flutter/material.dart';
 import '../models/course.dart';
 
-class CourseCard extends StatefulWidget {
+class CourseCard extends StatelessWidget {
   final Course course;
+  final bool isFavorite;
+  final VoidCallback onFavoriteChanged;
   final VoidCallback? onTap;
 
   const CourseCard({
     super.key,
     required this.course,
+    required this.isFavorite,
+    required this.onFavoriteChanged,
     this.onTap,
   });
-
-  @override
-  State<CourseCard> createState() => _CourseCardState();
-}
-
-class _CourseCardState extends State<CourseCard> {
-  // Local state
-  bool isFavorite = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +22,22 @@ class _CourseCardState extends State<CourseCard> {
       child: ListTile(
         leading: const Icon(Icons.school),
         title: Text(
-          widget.course.title,
+          course.title,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
         subtitle: Text(
-          '${widget.course.code} • ${widget.course.credits} SKS',
+          '${course.code} • ${course.credits} SKS',
         ),
         trailing: IconButton(
           icon: Icon(
             isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: isFavorite ? Colors.red : null,
           ),
-          onPressed: () {
-            setState(() {
-              isFavorite = !isFavorite;
-            });
-          },
+          onPressed: onFavoriteChanged,
         ),
-        onTap: widget.onTap,
+        onTap: onTap,
       ),
     );
   }
