@@ -92,7 +92,7 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 }
 
-// Menggunakan watch() untuk mendengarkan perubahan jumlah favorite.
+// watch() mendengarkan perubahan jumlah favorite.
 class CourseSummary extends StatelessWidget {
   final List<Course> courses;
 
@@ -105,6 +105,7 @@ class CourseSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<CourseState>();
     final favoriteCount = provider.favorites.length;
+    final firstCourse = courses.isNotEmpty ? courses.first : null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -117,7 +118,20 @@ class CourseSummary extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
+          // Tahap 8: menampilkan objek Course hasil parsing JSON.
+          if (firstCourse != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Model Course: ${firstCourse.title} '
+              '(${firstCourse.code}) - ${firstCourse.credits} SKS',
+              textAlign: TextAlign.center,
+            ),
+          ],
+
           const SizedBox(height: 12),
+
+          // Tombol kontrol favorite.
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 8,
@@ -141,7 +155,6 @@ class CourseSummary extends StatelessWidget {
                 onPressed: favoriteCount == 0
                     ? null
                     : () {
-                        // Hapus satu favorite.
                         final state = context.read<CourseState>();
                         state.toggleFavorite(
                           state.favorites.last,
@@ -164,7 +177,7 @@ class CourseSummary extends StatelessWidget {
   }
 }
 
-// Consumer membatasi rebuild pada bagian kartu course.
+// Consumer membatasi rebuild pada kartu course.
 class CourseList extends StatelessWidget {
   final List<Course> courses;
   final ValueChanged<Course> onCourseTap;
@@ -192,7 +205,6 @@ class CourseList extends StatelessWidget {
               course: course,
               isFavorite: isFavorite,
               onFavoriteChanged: () {
-                // read() digunakan untuk menjalankan aksi toggle.
                 context
                     .read<CourseState>()
                     .toggleFavorite(course.code);
