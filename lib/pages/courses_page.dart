@@ -1,14 +1,11 @@
-
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../models/course.dart';
 import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
+import '../services/course_service.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -23,24 +20,7 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   void initState() {
     super.initState();
-    coursesFuture = loadCourses();
-  }
-
-  Future<List<Course>> loadCourses() async {
-    final jsonString = await rootBundle.loadString(
-      'assets/data/student_data.json',
-    );
-
-    final data = jsonDecode(jsonString) as Map<String, dynamic>;
-    final courses = data['courses'] as List<dynamic>;
-
-    return courses
-        .map(
-          (course) => Course.fromJson(
-            course as Map<String, dynamic>,
-          ),
-        )
-        .toList();
+    coursesFuture = CourseService().loadCourses();
   }
 
   @override
