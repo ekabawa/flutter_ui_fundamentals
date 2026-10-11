@@ -3,8 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../models/course.dart';
+import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
 
@@ -17,14 +19,6 @@ class CoursesPage extends StatefulWidget {
 
 class _CoursesPageState extends State<CoursesPage> {
   late Future<List<Course>> coursesFuture;
-
-  // Shared state untuk daftar favorite.
-  final Set<String> favorites = {};
-
-  // Tahap 4: ValueNotifier untuk jumlah favorite.
-  final ValueNotifier<int> favoriteCount = ValueNotifier<int>(0);
-
-  List<Course> loadedCourses = [];
 
   @override
   void initState() {
@@ -49,52 +43,6 @@ class _CoursesPageState extends State<CoursesPage> {
         .toList();
   }
 
-  // Memperbarui favorite berdasarkan course yang dipilih.
-  void toggleFavorite(String code) {
-    setState(() {
-      if (favorites.contains(code)) {
-        favorites.remove(code);
-      } else {
-        favorites.add(code);
-      }
-    });
-
-    favoriteCount.value = favorites.length;
-  }
-
-  // Tombol Tambah Favorite.
-  // Menambahkan course pertama yang belum menjadi favorite.
-  void addFavorite() {
-    for (final course in loadedCourses) {
-      if (!favorites.contains(course.code)) {
-        toggleFavorite(course.code);
-        return;
-      }
-    }
-  }
-
-  // Tombol Kurangi Favorite.
-  // Menghapus satu course yang sedang menjadi favorite.
-  void subtractFavorite() {
-    if (favorites.isNotEmpty) {
-      toggleFavorite(favorites.last);
-    }
-  }
-
-  void clearFavorites() {
-    setState(() {
-      favorites.clear();
-    });
-
-    favoriteCount.value = favorites.length;
-  }
-
-  @override
-  void dispose() {
-    favoriteCount.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,22 +65,13 @@ class _CoursesPageState extends State<CoursesPage> {
           }
 
           final courses = snapshot.data ?? [];
-          loadedCourses = courses;
 
           return Column(
             children: [
-              CourseSummary(
-                favorites: favorites,
-                favoriteCount: favoriteCount,
-                onClearFavorites: clearFavorites,
-                onAddFavorite: addFavorite,
-                onSubtractFavorite: subtractFavorite,
-              ),
+              CourseSummary(courses: courses),
               Expanded(
                 child: CourseList(
                   courses: courses,
-                  favorites: favorites,
-                  onFavoriteChanged: toggleFavorite,
                   onCourseTap: (course) {
                     Navigator.push(
                       context,
@@ -153,40 +92,30 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 }
 
-// Ringkasan dan kontrol jumlah favorite.
+// Menggunakan watch() untuk mendengarkan perubahan jumlah favorite.
 class CourseSummary extends StatelessWidget {
-  final Set<String> favorites;
-  final ValueNotifier<int> favoriteCount;
-  final VoidCallback onClearFavorites;
-  final VoidCallback onAddFavorite;
-  final VoidCallback onSubtractFavorite;
+  final List<Course> courses;
 
   const CourseSummary({
     super.key,
-    required this.favorites,
-    required this.favoriteCount,
-    required this.onClearFavorites,
-    required this.onAddFavorite,
-    required this.onSubtractFavorite,
+    required this.courses,
   });
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<CourseState>();
+    final favoriteCount = provider.favorites.length;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
         children: [
-          ValueListenableBuilder<int>(
-            valueListenable: favoriteCount,
-            builder: (context, value, child) {
-              return Text(
-                'Jumlah Favorite: $value',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
+          Text(
+            'Jumlah Favorite: $favoriteCount',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -195,18 +124,36 @@ class CourseSummary extends StatelessWidget {
             runSpacing: 8,
             children: [
               OutlinedButton(
-                onPressed: onAddFavorite,
+                onPressed: () {
+                  // read() mengambil state tanpa listen.
+                  final state = context.read<CourseState>();
+
+                  for (final course in courses) {
+                    if (!state.favorites.contains(course.code)) {
+                      state.toggleFavorite(course.code);
+                      break;
+                    }
+                  }
+                },
                 child: const Text('Tambah Favorite'),
               ),
               OutlinedButton(
-                onPressed: favorites.isEmpty
+                onPressed: favoriteCount == 0
                     ? null
-                    : onSubtractFavorite,
+                    : () {
+                        // Hapus satu favorite.
+                        final state = context.read<CourseState>();
+                        state.toggleFavorite(
+                          state.favorites.last,
+                        );
+                      },
                 child: const Text('Kurangi Favorite'),
               ),
-              if (favorites.isNotEmpty)
+              if (favoriteCount > 0)
                 TextButton(
-                  onPressed: onClearFavorites,
+                  onPressed: () {
+                    context.read<CourseState>().clearFavorites();
+                  },
                   child: const Text('Reset'),
                 ),
             ],
@@ -217,18 +164,14 @@ class CourseSummary extends StatelessWidget {
   }
 }
 
-// Daftar course.
+// Consumer membatasi rebuild pada bagian kartu course.
 class CourseList extends StatelessWidget {
   final List<Course> courses;
-  final Set<String> favorites;
-  final ValueChanged<String> onFavoriteChanged;
   final ValueChanged<Course> onCourseTap;
 
   const CourseList({
     super.key,
     required this.courses,
-    required this.favorites,
-    required this.onFavoriteChanged,
     required this.onCourseTap,
   });
 
@@ -239,15 +182,24 @@ class CourseList extends StatelessWidget {
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
-        final isFavorite = favorites.contains(course.code);
 
-        return CourseCard(
-          course: course,
-          isFavorite: isFavorite,
-          onFavoriteChanged: () {
-            onFavoriteChanged(course.code);
+        return Consumer<CourseState>(
+          builder: (context, provider, child) {
+            final isFavorite =
+                provider.favorites.contains(course.code);
+
+            return CourseCard(
+              course: course,
+              isFavorite: isFavorite,
+              onFavoriteChanged: () {
+                // read() digunakan untuk menjalankan aksi toggle.
+                context
+                    .read<CourseState>()
+                    .toggleFavorite(course.code);
+              },
+              onTap: () => onCourseTap(course),
+            );
           },
-          onTap: () => onCourseTap(course),
         );
       },
     );

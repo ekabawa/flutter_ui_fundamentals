@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 
 class CourseState extends ChangeNotifier {
@@ -11,6 +10,11 @@ class CourseState extends ChangeNotifier {
       favorites.add(id);
     }
 
+    notifyListeners();
+  }
+
+  void clearFavorites() {
+    favorites.clear();
     notifyListeners();
   }
 }
