@@ -3,6 +3,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'pages/courses_page.dart';
+import 'package:provider/provider.dart';
+import 'state/course_state.dart';
 
 
 const String studentName = 'I Putu Eka Bawa Utama';
@@ -40,8 +42,12 @@ final List<Map<String, dynamic>> topics = [
 ];
 
 void main() {
-  runApp(const MyApp());
-  
+  runApp(
+    ChangeNotifierProvider<CourseState>(
+      create: (_) => CourseState(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 Widget buildStatCard(String value, String label, IconData icon) {
