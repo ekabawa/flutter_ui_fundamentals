@@ -1,8 +1,11 @@
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/course.dart';
+import '../state/course_state.dart';
 
-class CourseDetailPage extends StatefulWidget {
+class CourseDetailPage extends StatelessWidget {
   final Course course;
 
   const CourseDetailPage({
@@ -11,17 +14,9 @@ class CourseDetailPage extends StatefulWidget {
   });
 
   @override
-  State<CourseDetailPage> createState() =>
-      _CourseDetailPageState();
-}
-
-class _CourseDetailPageState
-    extends State<CourseDetailPage> {
-  bool isFavorite = false;
-
-  @override
   Widget build(BuildContext context) {
-    final course = widget.course;
+    final provider = context.watch<CourseState>();
+    final isFavorite = provider.favorites.contains(course.code);
 
     return Scaffold(
       appBar: AppBar(
@@ -63,40 +58,37 @@ class _CourseDetailPageState
 
             const SizedBox(height: 24),
 
-            // FAVORITE
+            // Favorite menggunakan Provider yang sama.
             ElevatedButton.icon(
               onPressed: () {
-                setState(() {
-                  isFavorite = !isFavorite;
-                });
+                context
+                    .read<CourseState>()
+                    .toggleFavorite(course.code);
+
+                final message = isFavorite
+                    ? 'Course dihapus dari favorite'
+                    : 'Course ditambahkan ke favorite';
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      isFavorite
-                          ? 'Course ditambahkan ke favorite'
-                          : 'Course dihapus dari favorite',
-                    ),
-                  ),
+                  SnackBar(content: Text(message)),
                 );
               },
               icon: Icon(
                 isFavorite
                     ? Icons.favorite
                     : Icons.favorite_border,
+                color: isFavorite ? Colors.red : null,
               ),
               label: Text(
-                isFavorite
-                    ? 'Favorite'
-                    : 'Tambah Favorite',
+                isFavorite ? 'Favorite' : 'Tambah Favorite',
               ),
             ),
 
             const SizedBox(height: 24),
 
-            Text(
+            const Text(
               'Informasi Course',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),

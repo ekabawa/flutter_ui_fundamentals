@@ -5,7 +5,6 @@ import '../models/course.dart';
 import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
-import '../services/course_service.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -20,7 +19,7 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   void initState() {
     super.initState();
-    coursesFuture = CourseService().loadCourses();
+    coursesFuture = context.read<CourseState>().loadCourses();
   }
 
   @override
