@@ -70,3 +70,12 @@ File `main.dart` bertanggung jawab untuk menginisialisasi aplikasi dan mengatur 
 Screen/Widget → Provider → Repository → Service/Data Source
 
 Pembacaan JSON dilakukan melalui Service, bukan langsung dari Screen/UI. Provider tidak menyimpan `BuildContext` sebagai state.
+
+
+## Finalisasi Praktikum
+
+Proyek telah menyelesaikan tahapan state management dan architecture, termasuk penggunaan Provider, pemisahan Service dan Repository, pengelolaan shared state, serta audit separation of concerns. Riwayat perkembangan proyek dikelola menggunakan Git dan disinkronkan ke repository GitHub.
+
+**Identitas Mahasiswa**
+- Nama: I Putu Eka Bawa Utama
+- NIM: 2415051008
