@@ -34,7 +34,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Course Explorer'),
+        title: const Text('Course Explorer v2'),
       ),
       body: Builder(
         builder: (context) {
@@ -73,24 +73,27 @@ class _CoursesPageState extends State<CoursesPage> {
             );
           }
 
-          return Column(
+          
+          return ListView(
+            padding: const EdgeInsets.only(top: 8, bottom: 16),
             children: [
-              CourseSummary(courses: courses),
-              Expanded(
-                child: CourseList(
-                  courses: courses,
-                  onCourseTap: (course) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CourseDetailPage(
-                          course: course,
-                        ),
-                      ),
-                    );
-                  },
+              CourseHeaderSummary(
+               courseCount: courses.length,
                 ),
+              CourseList(
+                courses: courses,
+                onCourseTap: (course) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CourseDetailPage(
+                        course: course,
+                      ),
+                    ),
+                  );
+                },
               ),
+              CourseSummary(courses: courses),
             ],
           );
         },
@@ -198,7 +201,9 @@ class CourseList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       itemCount: courses.length,
       itemBuilder: (context, index) {
         final course = courses[index];
@@ -224,3 +229,101 @@ class CourseList extends StatelessWidget {
     );
   }
 }
+
+
+class CourseHeaderSummary extends StatelessWidget {
+  final int courseCount;
+
+  const CourseHeaderSummary({
+    super.key,
+    required this.courseCount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final favoriteCount =
+        context.watch<CourseState>().favorites.length;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      child: Column(
+        children: [
+          // Identitas mahasiswa
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 10,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE3F2FD),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFFBBDEFB),
+              ),
+            ),
+            child: const Text(
+              '2415051008 • I Putu Eka Bawa Utama',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Statistik Courses dan Favorites
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard('Courses', courseCount),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildStatCard('Favorites', favoriteCount),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, int value) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F2FD),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: const Color(0xFFBBDEFB),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$value',
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

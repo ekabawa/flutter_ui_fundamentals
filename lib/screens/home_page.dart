@@ -13,9 +13,11 @@ class HomePage extends StatelessWidget {
       backgroundColor: const Color(0xFFF8F8FC),
       appBar: AppBar(
         title: const Text('Course Explorer'),
-        backgroundColor: const Color(0xFFF8F8FC),
+        backgroundColor: const Color(0xFF1976D2),
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
+
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

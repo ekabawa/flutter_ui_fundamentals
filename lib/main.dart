@@ -46,16 +46,13 @@ final List<Map<String, dynamic>> topics = [
 
 
 
+
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<CourseState>(
-          create: (_) => CourseState(
-            CourseRepository(
-              CourseService(),
-            ),
-          ),
+          create: (_) => CourseState(),
         ),
         ChangeNotifierProvider<CourseProvider>(
           create: (_) => CourseProvider(
@@ -69,6 +66,7 @@ void main() {
     ),
   );
 }
+
 
 
 Widget buildStatCard(String value, String label, IconData icon) {
@@ -1014,43 +1012,127 @@ class NavigationProfilePage extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 24),
+
+            // Foto profil mahasiswa
+            ClipOval(
+              child: Image.asset(
+                'assets/images/profile.jpg',
+                width: 130,
+                height: 130,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const CircleAvatar(
+                    radius: 65,
+                    backgroundColor: Color(0xFFE3F2FD),
+                    child: Icon(
+                      Icons.person,
+                      size: 70,
+                      color: Color(0xFF1976D2),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Judul profil
             const Text(
               'Profile Mahasiswa',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 16),
-
-            const Text(
-              'Nama: I Putu Eka Bawa Utama',
-              style: TextStyle(fontSize: 18),
-            ),
-
-            const SizedBox(height: 8),
-
-            const Text(
-              'NIM: 2415051008',
-              style: TextStyle(fontSize: 18),
-            ),
-
             const SizedBox(height: 20),
 
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const FeedbackFormPage(),
+            // Informasi mahasiswa
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE3F2FD),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFBBDEFB),
+                ),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.school,
+                    size: 32,
+                    color: Color(0xFF1976D2),
                   ),
-                );
-              },
-              child: const Text('Beri Feedback'),
+
+                  SizedBox(height: 12),
+
+                  Text(
+                    'I Putu Eka Bawa Utama',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  SizedBox(height: 8),
+
+                  Text(
+                    'NIM: 2415051008',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  SizedBox(height: 8),
+
+                  Text(
+                    'PTI 5A',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Tombol menuju halaman feedback
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const FeedbackFormPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.feedback_outlined),
+                label: const Text('Beri Feedback'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1976D2),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -1058,7 +1140,6 @@ class NavigationProfilePage extends StatelessWidget {
     );
   }
 }
-
 
 
 
