@@ -44,3 +44,29 @@ yang menggunakan asset JSON, FutureBuilder, ListView, dan reusable widget.
 2. Jalankan `flutter pub get`.
 3. Hubungkan emulator atau perangkat Android.
 4. Jalankan aplikasi dengan `flutter run`.
+
+
+
+
+
+## Arsitektur Aplikasi
+
+Project ini menerapkan pemisahan tanggung jawab (*separation of concerns*) agar kode lebih terstruktur dan mudah dipelihara.
+
+### Tanggung Jawab Folder
+
+- `models/`: Mendefinisikan struktur data mata kuliah.
+- `services/`: Membaca dan memproses data dari sumber data JSON.
+- `repositories/`: Menjadi perantara antara Provider dan Service.
+- `providers/`: Mengelola state mata kuliah, loading, dan error.
+- `state/`: Mengelola state bersama, seperti daftar Favorites.
+- `screens/`: Menyediakan halaman antarmuka aplikasi.
+- `widgets/`: Menyediakan komponen UI yang dapat digunakan kembali.
+
+File `main.dart` bertanggung jawab untuk menginisialisasi aplikasi dan mengatur konfigurasi Provider.
+
+### Arah Dependency
+
+Screen/Widget → Provider → Repository → Service/Data Source
+
+Pembacaan JSON dilakukan melalui Service, bukan langsung dari Screen/UI. Provider tidak menyimpan `BuildContext` sebagai state.

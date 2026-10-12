@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
@@ -9,17 +7,11 @@ import 'services/course_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
 import 'screens/favorites_page.dart';
+import 'services/student_data_service.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
 
-Future<Map<String, dynamic>> loadStudentData() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/student_data.json',
-  );
-
-  return jsonDecode(jsonString) as Map<String, dynamic>;
-}
 
 final List<Map<String, dynamic>> topics = [
   {
@@ -201,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    studentFuture = loadStudentData();
+    studentFuture = StudentDataService().loadStudentData();
   }
 
   @override
@@ -949,7 +941,7 @@ class _NavigationCoursesPageState
   @override
   void initState() {
     super.initState();
-    studentFuture = loadStudentData();
+    studentFuture = StudentDataService().loadStudentData();
   }
 
   @override
