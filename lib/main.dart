@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
-import 'pages/courses_page.dart';
+import 'screens/home_page.dart';
+import 'screens/courses_page.dart';
 import 'package:provider/provider.dart';
 import 'state/course_state.dart';
 import 'services/course_service.dart';
