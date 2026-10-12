@@ -5,6 +5,7 @@ import '../models/course.dart';
 import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
+import '../providers/course_provider.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -19,31 +20,58 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   void initState() {
     super.initState();
-    coursesFuture = context.read<CourseState>().loadCourses();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<CourseProvider>().loadCourses();
+    });
   }
 
+ 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<CourseProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Course Explorer'),
       ),
-      body: FutureBuilder<List<Course>>(
-        future: coursesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: Builder(
+        builder: (context) {
+          if (provider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          if (snapshot.hasError) {
+          if (provider.error != null) {
             return Center(
-              child: Text('Terjadi error: ${snapshot.error}'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Terjadi error: ${provider.error}'),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<CourseProvider>().loadCourses();
+                      },
+                      child: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
+              ),
             );
           }
 
-          final courses = snapshot.data ?? [];
+          final courses = provider.courses;
+
+          if (courses.isEmpty) {
+            return const Center(
+              child: Text('Belum ada data mata kuliah.'),
+            );
+          }
 
           return Column(
             children: [

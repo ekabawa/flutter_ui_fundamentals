@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'state/course_state.dart';
 import 'services/course_service.dart';
 import 'repositories/course_repository.dart';
+import 'providers/course_provider.dart';
 
 
 const String studentName = 'I Putu Eka Bawa Utama';
@@ -44,14 +45,26 @@ final List<Map<String, dynamic>> topics = [
 ];
 
 
+
 void main() {
   runApp(
-    ChangeNotifierProvider<CourseState>(
-      create: (_) => CourseState(
-        CourseRepository(
-          CourseService(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CourseState>(
+          create: (_) => CourseState(
+            CourseRepository(
+              CourseService(),
+            ),
+          ),
         ),
-      ),
+        ChangeNotifierProvider<CourseProvider>(
+          create: (_) => CourseProvider(
+            CourseRepository(
+              CourseService(),
+            ),
+          ),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
