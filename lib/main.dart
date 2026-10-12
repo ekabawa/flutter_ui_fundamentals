@@ -8,7 +8,7 @@ import 'state/course_state.dart';
 import 'services/course_service.dart';
 import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
-
+import 'screens/favorites_page.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -810,8 +810,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   final List<Widget> pages = const [
     HomePage(),
     CoursesPage(),
+    FavoritesPage(),
     NavigationProfilePage(),
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -836,6 +838,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 NavigationDestination(
                   icon: Icon(Icons.school),
                   label: 'Courses',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.favorite),
+                  label: 'Favorites',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.person),
@@ -864,6 +870,10 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                   NavigationRailDestination(
                     icon: Icon(Icons.school),
                     label: Text('Courses'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.favorite),
+                    label: Text('Favorites'),
                   ),
                   NavigationRailDestination(
                     icon: Icon(Icons.person),

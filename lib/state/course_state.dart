@@ -11,15 +11,19 @@ class CourseState extends ChangeNotifier {
 
   final Set<String> favorites = {};
 
+  bool isFavorite(String code) {
+    return favorites.contains(code);
+  }
+
   Future<List<Course>> loadCourses() {
     return repository.getCourses();
   }
 
-  void toggleFavorite(String id) {
-    if (favorites.contains(id)) {
-      favorites.remove(id);
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
     } else {
-      favorites.add(id);
+      favorites.add(code);
     }
 
     notifyListeners();
