@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class DebuggingChallengePage extends StatelessWidget {
   const DebuggingChallengePage({super.key});
@@ -125,6 +126,66 @@ class DebugDetailPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+// ======================================
+// KASUS D - ASYNC DAN MOUNTED
+// ======================================
+
+class AsyncMountedDebugPage extends StatefulWidget {
+  const AsyncMountedDebugPage({super.key});
+
+  @override
+  State<AsyncMountedDebugPage> createState() =>
+      _AsyncMountedDebugPageState();
+}
+
+class _AsyncMountedDebugPageState
+    extends State<AsyncMountedDebugPage> {
+  String status = 'Belum dimulai';
+
+  Future<void> mulaiProses() async {
+    setState(() {
+      status = 'Memproses...';
+    });
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (!mounted) return;
+
+    setState(() {
+      status = 'Proses selesai';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kasus D - Async dan mounted'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                status,
+                style: const TextStyle(fontSize: 20),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: mulaiProses,
+                child: const Text('Mulai Proses Async'),
+              ),
+            ],
           ),
         ),
       ),
