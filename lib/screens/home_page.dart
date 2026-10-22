@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'course_api_page.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -130,7 +130,22 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+
+              const SizedBox(height: 12),
+
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CourseApiPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.cloud_download),
+                label: const Text('Uji REST API'),
+              ),
+            ]
           ),
         ),
       ),

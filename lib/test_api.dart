@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'models/course.dart';
 import 'services/course_api_service.dart';
 
 Future<void> main() async {
@@ -8,9 +9,15 @@ Future<void> main() async {
   final apiService = CourseApiService();
 
   try {
-    final data = await apiService.fetchCourses();
+    final List<Course> courses = await apiService.fetchCourses();
+
     debugPrint('GET berhasil!');
-    debugPrint('Jumlah data: ${data.length}');
+    debugPrint('Jumlah data: ${courses.length}');
+
+    for (final course in courses.take(3)) {
+      debugPrint('Code: ${course.code}');
+      debugPrint('Title: ${course.title}');
+    }
   } catch (e) {
     debugPrint('GET gagal: $e');
   }

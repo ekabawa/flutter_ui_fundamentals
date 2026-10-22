@@ -2,19 +2,27 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../models/course.dart';
 
-const String apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+const String apiUrl =
+    'https://jsonplaceholder.typicode.com/posts';
 
 class CourseApiService {
-  Future<List<dynamic>> fetchCourses() async {
+  Future<List<Course>> fetchCourses() async {
     final response = await http.get(Uri.parse(apiUrl));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List<dynamic>;
 
-      debugPrint('Jumlah data dari API: ${data.length}');
+      final courses = data.map((item) {
+        return Course.fromJson(
+          item as Map<String, dynamic>,
+        );
+      }).toList();
 
-      return data;
+      debugPrint('Jumlah data dari API: ${courses.length}');
+
+      return courses;
     }
 
     throw Exception('HTTP ${response.statusCode}');
