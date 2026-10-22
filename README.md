@@ -79,3 +79,37 @@ Proyek telah menyelesaikan tahapan state management dan architecture, termasuk p
 **Identitas Mahasiswa**
 - Nama: I Putu Eka Bawa Utama
 - NIM: 2415051008
+
+
+## Tahap 1 — Membaca REST Endpoint dan JSON
+
+### 1. Endpoint API
+- **URL:** https://jsonplaceholder.typicode.com/posts/1
+- **HTTP Method:** GET
+- **Status Code:** 200 OK
+- **Resource:** posts
+- **Format Response:** JSON
+
+### 2. Struktur Response JSON
+Endpoint mengembalikan data satu post dengan struktur berikut:
+
+```json
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+}
+```
+
+### 3. Identifikasi Field JSON
+
+- **userId** (Integer): ID pengguna pemilik post.
+- **id** (Integer): ID post.
+- **title** (String): Judul post.
+- **body** (String): Isi post.
+
+### 4. Catatan dan Temuan
+Endpoint berhasil diakses menggunakan metode GET dengan status code 200 OK. Server mengembalikan response dalam format JSON yang berisi empat field, yaitu `userId`, `id`, `title`, dan `body`. Data tersebut dapat digunakan sebagai contoh untuk mempelajari proses pengambilan dan pengolahan data dari REST API.
+
+**Catatan:** JSONPlaceholder merupakan API latihan. Operasi penulisan data pada layanan ini disimulasikan dan tidak disimpan secara permanen.
