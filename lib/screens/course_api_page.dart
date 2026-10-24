@@ -17,7 +17,7 @@ class _CourseApiPageState extends State<CourseApiPage> {
   @override
   void initState() {
     super.initState();
-    coursesFuture = apiService.fetchCourses();
+    coursesFuture = apiService.getCourses();
   }
 
   @override

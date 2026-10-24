@@ -9,7 +9,7 @@ Future<void> main() async {
   final apiService = CourseApiService();
 
   try {
-    final List<Course> courses = await apiService.fetchCourses();
+    final List<Course> courses = await apiService.getCourses();
 
     debugPrint('GET berhasil!');
     debugPrint('Jumlah data: ${courses.length}');
