@@ -31,4 +31,31 @@ class CourseApiService {
         )
         .toList();
   }
+  
+  Future<Course> createCourse(Course course) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/posts'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'title': course.title,
+        'body': '${course.code}|${course.credits}',
+        'userId': 1,
+      }),
+    );
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      final data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+
+      return Course.fromJson(data);
+    }
+
+    throw Exception(
+      'Gagal membuat course: HTTP ${response.statusCode}',
+    );
+  }
+
 }
