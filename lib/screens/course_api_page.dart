@@ -106,6 +106,183 @@ class _CourseApiPageState extends State<CourseApiPage> {
       }
     }
   }
+  
+  Future<void> showEditCourseDialog(Course course) async {
+    final editFormKey = GlobalKey<FormState>();
+    final editCodeController =
+        TextEditingController(text: course.code);
+    final editTitleController =
+        TextEditingController(text: course.title);
+    final editCreditsController =
+        TextEditingController(text: course.credits.toString());
+
+    bool isSaving = false;
+
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: const Text('Edit Course'),
+                content: Form(
+                  key: editFormKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: editCodeController,
+                          decoration: const InputDecoration(
+                            labelText: 'Code',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) =>
+                              value == null ||
+                                      value.trim().isEmpty
+                                  ? 'Code wajib diisi'
+                                  : null,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: editTitleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) =>
+                              value == null ||
+                                      value.trim().isEmpty
+                                  ? 'Title wajib diisi'
+                                  : null,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: editCreditsController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Credits',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null ||
+                                value.trim().isEmpty) {
+                              return 'Credits wajib diisi';
+                            }
+                            if (int.tryParse(value.trim()) ==
+                                null) {
+                              return 'Credits harus berupa angka bulat';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: isSaving
+                        ? null
+                        : () => Navigator.pop(dialogContext),
+                    child: const Text('Batal'),
+                  ),
+                  ElevatedButton(
+                    onPressed: isSaving
+                        ? null
+                        : () async {
+                            if (!editFormKey.currentState!
+                                .validate()) {
+                              return;
+                            }
+
+                            if (course.id == null) {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'ID course tidak tersedia',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            setDialogState(
+                              () => isSaving = true,
+                            );
+
+                            try {
+                              final updatedCourse = Course(
+                                id: course.id,
+                                code: editCodeController.text.trim(),
+                                title: editTitleController.text.trim(),
+                                credits: int.parse(
+                                  editCreditsController.text.trim(),
+                                ),
+                                status: course.status,
+                              );
+
+                              await apiService.updateCourse(
+                                course.id!,
+                                updatedCourse,
+                              );
+
+                              if (!mounted  ||
+                                !dialogContext.mounted) {
+                              return;}
+
+                              Navigator.pop(dialogContext);
+
+                              ScaffoldMessenger.of(this.context)
+                                  .showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'PUT berhasil memperbarui course',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              await loadCourses();
+                            
+                          } catch (e) {
+                            if (!mounted || !dialogContext.mounted) {
+                              return;
+                            }
+
+                            ScaffoldMessenger.of(this.context).showSnackBar(
+                              SnackBar(
+                                content: Text('Gagal memperbarui course: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          } finally {
+                            if (dialogContext.mounted) {
+                              setDialogState(() => isSaving = false);
+                            }
+                          }
+                          },
+                    child: Text(
+                      isSaving ? 'Menyimpan...' : 'Simpan',
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+      editCodeController.dispose();
+      editTitleController.dispose();
+      editCreditsController.dispose();
+    });
+    }
+   }
+
 
   Widget buildCourseForm() {
     return Card(
@@ -266,14 +443,22 @@ class _CourseApiPageState extends State<CourseApiPage> {
                       final index = entry.key;
                       final course = entry.value;
 
+                      
                       return ListTile(
                         leading: CircleAvatar(
                           child: Text('${index + 1}'),
                         ),
                         title: Text(course.title),
-                        subtitle: Text('Code: ${course.code}'),
+                        subtitle: Text(
+                          'Code: ${course.code} | Credits: ${course.credits}',
+                        ),
+                        trailing: IconButton(
+                          tooltip: 'Edit course',
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => showEditCourseDialog(course),
+                        ),
                       );
-                    },
+                    }
                   ),
                 ],
               ],
