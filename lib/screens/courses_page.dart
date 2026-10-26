@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../services/course_supabase_service.dart';
 
 import '../models/course.dart';
 import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
-import '../providers/course_provider.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -17,90 +17,111 @@ class CoursesPage extends StatefulWidget {
 class _CoursesPageState extends State<CoursesPage> {
   late Future<List<Course>> coursesFuture;
 
+  final CourseSupabaseService _supabaseService =
+      CourseSupabaseService();
+
   @override
   void initState() {
     super.initState();
+    coursesFuture = _supabaseService.getCourses();
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<CourseProvider>().loadCourses();
+  void _reloadCourses() {
+    setState(() {
+      coursesFuture = _supabaseService.getCourses();
     });
   }
 
  
+ 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<CourseProvider>();
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Course Explorer v2'),
+        ),
+        body: FutureBuilder<List<Course>>(
+          future: coursesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState ==
+                ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Course Explorer v2'),
-      ),
-      body: Builder(
-        builder: (context) {
-          if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          if (provider.error != null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Terjadi error: ${provider.error}'),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<CourseProvider>().loadCourses();
-                      },
-                      child: const Text('Coba Lagi'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final courses = provider.courses;
-
-          if (courses.isEmpty) {
-            return const Center(
-              child: Text('Belum ada data mata kuliah.'),
-            );
-          }
-
-          
-          return ListView(
-            padding: const EdgeInsets.only(top: 8, bottom: 16),
-            children: [
-              CourseHeaderSummary(
-               courseCount: courses.length,
-                ),
-              CourseList(
-                courses: courses,
-                onCourseTap: (course) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CourseDetailPage(
-                        course: course,
+            if (snapshot.hasError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Terjadi error: ${snapshot.error}',
+                        textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: _reloadCourses,
+                        child: const Text('Coba Lagi'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final courses = snapshot.data ?? [];
+
+            if (courses.isEmpty) {
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  CourseHeaderSummary(
+                    courseCount: 0,
+                  ),
+                  const Center(
+                    child: Text(
+                      'Belum ada data mata kuliah.',
                     ),
-                  );
-                },
+                  ),
+                ],
+              );
+            }
+
+            return ListView(
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 16,
               ),
-              CourseSummary(courses: courses),
-            ],
-          );
-        },
-      ),
-    );
-  }
+              children: [
+                CourseHeaderSummary(
+                  courseCount: courses.length,
+                ),
+                CourseList(
+                  courses: courses,
+                  onCourseTap: (course) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CourseDetailPage(
+                          course: course,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                CourseSummary(courses: courses),
+              ],
+            );
+          },
+        ),
+      );
+    }
 }
+
 
 // watch() mendengarkan perubahan jumlah favorite.
 class CourseSummary extends StatelessWidget {
