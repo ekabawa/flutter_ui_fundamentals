@@ -284,6 +284,73 @@ class _CourseApiPageState extends State<CourseApiPage> {
    }
 
 
+Future<void> confirmDeleteCourse(Course course) async {
+  if (course.id == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ID course tidak tersedia'),
+      ),
+    );
+    return;
+  }
+
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Hapus Course?'),
+      content: Text(
+        'Apakah kamu yakin ingin menghapus "${course.title}"?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: const Text('Batal'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('Hapus'),
+        ),
+      ],
+    ),
+  );
+
+  if (!mounted || confirmed != true) return;
+
+  try {
+    await apiService.deleteCourse(course.id!);
+
+    if (!mounted) return;
+
+    setState(() {
+      courses.removeWhere((item) => item.id == course.id);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('DELETE berhasil: ${course.title}'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    await loadCourses();
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Gagal menghapus course: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+
+
   Widget buildCourseForm() {
     return Card(
       margin: const EdgeInsets.all(12),
@@ -452,10 +519,24 @@ class _CourseApiPageState extends State<CourseApiPage> {
                         subtitle: Text(
                           'Code: ${course.code} | Credits: ${course.credits}',
                         ),
-                        trailing: IconButton(
-                          tooltip: 'Edit course',
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => showEditCourseDialog(course),
+                        
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              tooltip: 'Edit course',
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => showEditCourseDialog(course),
+                            ),
+                            IconButton(
+                              tooltip: 'Delete course',
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () => confirmDeleteCourse(course),
+                            ),
+                          ],
                         ),
                       );
                     }
