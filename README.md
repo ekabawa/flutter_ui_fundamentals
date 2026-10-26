@@ -113,3 +113,69 @@ Endpoint mengembalikan data satu post dengan struktur berikut:
 Endpoint berhasil diakses menggunakan metode GET dengan status code 200 OK. Server mengembalikan response dalam format JSON yang berisi empat field, yaitu `userId`, `id`, `title`, dan `body`. Data tersebut dapat digunakan sebagai contoh untuk mempelajari proses pengambilan dan pengolahan data dari REST API.
 
 **Catatan:** JSONPlaceholder merupakan API latihan. Operasi penulisan data pada layanan ini disimulasikan dan tidak disimpan secara permanen.
+
+
+---
+
+## Backend yang Digunakan
+
+Project ini menggunakan dua sumber data:
+
+- **Supabase:** Backend database untuk pengelolaan data mata kuliah melalui operasi CRUD.
+- **JSONPlaceholder:** REST API latihan untuk mempelajari komunikasi HTTP menggunakan GET, POST, PUT, dan DELETE.
+
+## Arsitektur Singkat
+
+Aplikasi menerapkan pemisahan tanggung jawab (*separation of concerns*) dengan alur:
+
+`Screen/Widget → Provider → Repository → Service → Data Source`
+
+- **Screen/Widget:** Menampilkan antarmuka dan menerima interaksi pengguna.
+- **Provider:** Mengelola state, loading, dan error.
+- **Repository:** Menjadi perantara antara Provider dan Service.
+- **Service:** Menangani komunikasi dengan REST API atau Supabase.
+- **Data Source:** Menyediakan data melalui backend atau API.
+
+## Cara Menjalankan Aplikasi
+
+1. Pastikan Flutter SDK dan emulator Android sudah tersedia.
+2. Clone repository:
+
+   ```bash
+   git clone https://github.com/ekabawa/flutter_ui_fundamentals.git
+   ```
+
+3. Masuk ke folder project:
+
+   ```bash
+   cd flutter_ui_fundamentals
+   ```
+
+4. Instal dependency:
+
+   ```bash
+   flutter pub get
+   ```
+
+5. Pastikan konfigurasi Supabase sesuai dengan project yang digunakan.
+6. Jalankan aplikasi:
+
+   ```bash
+   flutter run
+   ```
+
+## Error Handling dan Keamanan
+
+Pengujian praktikum mencakup penanganan HTTP 404, kegagalan koneksi internet, dan kesalahan pemetaan JSON. Aplikasi menyediakan pesan error dan tombol coba lagi ketika pemuatan data gagal.
+
+Konfigurasi keamanan dasar mencakup penggunaan publishable key Supabase, pemeriksaan kebijakan Row Level Security (RLS), serta pengabaian file `.env` melalui `.gitignore`. Kebijakan RLS harus disesuaikan dengan kebutuhan akses backend.
+
+## Hasil Pemeriksaan
+
+Pemeriksaan kode terakhir menggunakan `flutter analyze` menghasilkan:
+
+`No issues found!`
+
+Perubahan project dikelola menggunakan Git dan disinkronkan ke repository GitHub.
+
+Repository: https://github.com/ekabawa/flutter_ui_fundamentals
