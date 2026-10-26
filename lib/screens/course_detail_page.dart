@@ -4,6 +4,8 @@ import 'edit_course_page.dart';
 
 import '../models/course.dart';
 import '../state/course_state.dart';
+import '../services/course_supabase_service.dart';
+
 
 class CourseDetailPage extends StatelessWidget {
   final Course course;
@@ -112,6 +114,68 @@ class CourseDetailPage extends StatelessWidget {
                 label: const Text('Edit Course'),
               ),
             ),
+            
+              const SizedBox(height: 12),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: course.id == null
+                      ? null
+                      : () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const Text('Hapus Course?'),
+                              content: Text(
+                                'Apakah Anda yakin ingin menghapus '
+                                '${course.title}?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(dialogContext, false);
+                                  },
+                                  child: const Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(dialogContext, true);
+                                  },
+                                  child: const Text('Hapus'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm != true || !context.mounted) return;
+
+                          try {
+                            await CourseSupabaseService().deleteCourse(
+                              course.id!,
+                            );
+
+                            if (!context.mounted) return;
+
+                            Navigator.pop(context, true);
+                          } catch (e) {
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Gagal menghapus course: $e'),
+                              ),
+                            );
+                          }
+                        },
+                  icon: const Icon(Icons.delete),
+                  label: const Text('Hapus Course'),
+                ),
+              ),
 
             const SizedBox(height: 24),
 

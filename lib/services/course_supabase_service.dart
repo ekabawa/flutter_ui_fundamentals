@@ -47,4 +47,11 @@ Future<void> updateCourse(Course course) async {
       .eq('id', course.id!);
 }
 
+Future<void> deleteCourse(int id) async {
+    await _supabase
+        .from('courses')
+        .delete()
+        .eq('id', id);
+}
+
 }
