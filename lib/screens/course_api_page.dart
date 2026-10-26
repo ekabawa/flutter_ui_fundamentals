@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
 import '../services/course_api_service.dart';
+import '../repositories/course_api_repository.dart';
 
 class CourseApiPage extends StatefulWidget {
   const CourseApiPage({super.key});
@@ -11,12 +12,14 @@ class CourseApiPage extends StatefulWidget {
 }
 
 class _CourseApiPageState extends State<CourseApiPage> {
-  final CourseApiService apiService = CourseApiService();
+  final CourseApiRepository repository =
+    CourseApiRepository(CourseApiService());
 
   final formKey = GlobalKey<FormState>();
   final codeController = TextEditingController();
   final titleController = TextEditingController();
   final creditsController = TextEditingController();
+
 
   List<Course> courses = [];
   bool isLoading = true;
@@ -44,7 +47,7 @@ class _CourseApiPageState extends State<CourseApiPage> {
     });
 
     try {
-      final result = await apiService.getCourses();
+      final result = await repository.getCourses();
       if (!mounted) return;
 
       setState(() {
@@ -73,7 +76,7 @@ class _CourseApiPageState extends State<CourseApiPage> {
     setState(() => isSubmitting = true);
 
     try {
-      final createdCourse = await apiService.createCourse(course);
+      final createdCourse = await repository.createCourse(course);
 
       if (!mounted) return;
 
@@ -224,7 +227,7 @@ class _CourseApiPageState extends State<CourseApiPage> {
                                 status: course.status,
                               );
 
-                              await apiService.updateCourse(
+                              await repository.updateCourse(
                                 course.id!,
                                 updatedCourse,
                               );
@@ -321,7 +324,7 @@ Future<void> confirmDeleteCourse(Course course) async {
   if (!mounted || confirmed != true) return;
 
   try {
-    await apiService.deleteCourse(course.id!);
+    await repository.deleteCourse(course.id!);
 
     if (!mounted) return;
 

@@ -4,10 +4,10 @@ import 'screens/courses_page.dart';
 import 'package:provider/provider.dart';
 import 'state/course_state.dart';
 import 'services/course_service.dart';
-import 'repositories/course_repository.dart';
 import 'providers/course_provider.dart';
 import 'screens/favorites_page.dart';
 import 'services/student_data_service.dart';
+import 'repositories/course_repository.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
