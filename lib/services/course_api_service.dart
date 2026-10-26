@@ -23,7 +23,7 @@ class CourseApiService {
 
     final data = jsonDecode(response.body) as List<dynamic>;
 
-    return data
+      return data
         .map(
           (item) => Course.fromJson(
             item as Map<String, dynamic>,
