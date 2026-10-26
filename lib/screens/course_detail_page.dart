@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'edit_course_page.dart';
 
 import '../models/course.dart';
 import '../state/course_state.dart';
@@ -84,10 +84,40 @@ class CourseDetailPage extends StatelessWidget {
               ),
             ),
 
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: course.id == null
+                    ? null
+                    : () async {
+                        final updated = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditCoursePage(
+                              course: course,
+                            ),
+                          ),
+                        );
+
+                        if (!context.mounted) return;
+
+                        if (updated == true) {
+                          Navigator.pop(context, true);
+                        }
+                      },
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Course'),
+              ),
+            ),
+
             const SizedBox(height: 24),
 
             const Text(
               'Informasi Course',
+
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

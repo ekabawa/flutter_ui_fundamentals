@@ -29,4 +29,22 @@ class CourseSupabaseService {
         .from('courses')
         .insert(data);
   }
+
+  
+Future<void> updateCourse(Course course) async {
+  if (course.id == null) {
+    throw ArgumentError('ID course tidak boleh kosong.');
+  }
+
+  await _supabase
+      .from('courses')
+      .update({
+        'code': course.code,
+        'title': course.title,
+        'credits': course.credits,
+        'status': course.status,
+      })
+      .eq('id', course.id!);
+}
+
 }

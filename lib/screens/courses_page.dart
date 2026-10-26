@@ -120,16 +120,20 @@ class _CoursesPageState extends State<CoursesPage> {
                 ),
                 CourseList(
                   courses: courses,
-                  onCourseTap: (course) {
-                    Navigator.push(
+                  
+                  onCourseTap: (course) async {
+                    final result = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            CourseDetailPage(
+                        builder: (context) => CourseDetailPage(
                           course: course,
                         ),
                       ),
                     );
+
+                    if (result == true && mounted) {
+                      _reloadCourses();
+                    }
                   },
                 ),
                 CourseSummary(courses: courses),
