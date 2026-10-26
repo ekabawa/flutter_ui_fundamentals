@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/course_supabase_service.dart';
+import '../providers/course_provider.dart';
 import 'create_course_page.dart';
 
 import '../models/course.dart';
@@ -11,26 +11,24 @@ import 'course_detail_page.dart';
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
 
-  @override
-  State<CoursesPage> createState() => _CoursesPageState();
+@override
+State<CoursesPage> createState() => _CoursesPageState();
 }
 
 class _CoursesPageState extends State<CoursesPage> {
-  late Future<List<Course>> coursesFuture;
-
-  final CourseSupabaseService _supabaseService =
-      CourseSupabaseService();
-
   @override
   void initState() {
     super.initState();
-    coursesFuture = _supabaseService.getCourses();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<CourseProvider>().loadCourses();
+      }
+    });
   }
 
-  void _reloadCourses() {
-    setState(() {
-      coursesFuture = _supabaseService.getCourses();
-    });
+  Future<void> _reloadCourses() async {
+    await context.read<CourseProvider>().loadCourses();
   }
 
  
@@ -59,25 +57,35 @@ class _CoursesPageState extends State<CoursesPage> {
             ),
           ],
         ),
-        body: FutureBuilder<List<Course>>(
-          future: coursesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState ==
-                ConnectionState.waiting) {
+       
+        body: Consumer<CourseProvider>(
+          builder: (context, provider, child) {
+            if (provider.isLoading) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
             }
 
-            if (snapshot.hasError) {
+            if (provider.error != null) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Gagal memuat data course.',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
-                        'Terjadi error: ${snapshot.error}',
+                        provider.error!,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 12),
@@ -91,19 +99,15 @@ class _CoursesPageState extends State<CoursesPage> {
               );
             }
 
-            final courses = snapshot.data ?? [];
+            final courses = provider.courses;
 
             if (courses.isEmpty) {
               return ListView(
                 padding: const EdgeInsets.all(16),
-                children: [
-                  CourseHeaderSummary(
-                    courseCount: 0,
-                  ),
-                  const Center(
-                    child: Text(
-                      'Belum ada data mata kuliah.',
-                    ),
+                children: const [
+                  CourseHeaderSummary(courseCount: 0),
+                  Center(
+                    child: Text('Belum ada data mata kuliah.'),
                   ),
                 ],
               );
@@ -120,19 +124,18 @@ class _CoursesPageState extends State<CoursesPage> {
                 ),
                 CourseList(
                   courses: courses,
-                  
                   onCourseTap: (course) async {
                     final result = await Navigator.push<bool>(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CourseDetailPage(
+                        builder: (_) => CourseDetailPage(
                           course: course,
                         ),
                       ),
                     );
 
                     if (result == true && mounted) {
-                      _reloadCourses();
+                      await _reloadCourses();
                     }
                   },
                 ),

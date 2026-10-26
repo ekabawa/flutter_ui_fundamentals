@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/course.dart';
-import '../services/course_supabase_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/course_provider.dart';
 
 class EditCoursePage extends StatefulWidget {
   final Course course;
@@ -21,9 +22,6 @@ class _EditCoursePageState extends State<EditCoursePage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _creditsController = TextEditingController();
-
-  final CourseSupabaseService _service =
-      CourseSupabaseService();
 
   String _status = 'planned';
   bool _isSaving = false;
@@ -44,38 +42,59 @@ class _EditCoursePageState extends State<EditCoursePage> {
     super.dispose();
   }
 
-  Future<void> _saveCourse() async {
-    if (!_formKey.currentState!.validate()) return;
+  
+Future<void> _saveCourse() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
+  setState(() => _isSaving = true);
 
-    try {
-      final updatedCourse = Course(
-        id: widget.course.id,
-        code: widget.course.code,
-        title: _titleController.text.trim(),
-        credits: int.parse(_creditsController.text.trim()),
-        status: _status,
-      );
+  try {
+    final updatedCourse = Course(
+      id: widget.course.id,
+      code: widget.course.code,
+      title: _titleController.text.trim(),
+      credits: int.parse(_creditsController.text.trim()),
+      status: _status,
+    );
 
-      await _service.updateCourse(updatedCourse);
+    final success = await context
+        .read<CourseProvider>()
+        .updateCourse(updatedCourse);
 
-      if (!mounted) return;
-      Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
+    if (!mounted) return;
 
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal memperbarui course: $e'),
+        const SnackBar(
+          content: Text('Course berhasil diperbarui'),
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Gagal memperbarui course. Silakan coba lagi.',
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Gagal memperbarui course: $e'),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => _isSaving = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

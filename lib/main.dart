@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
 import 'screens/courses_page.dart';
 import 'package:provider/provider.dart';
-import 'state/course_state.dart';
-import 'services/course_service.dart';
+import 'services/course_supabase_service.dart';
 import 'providers/course_provider.dart';
 import 'screens/favorites_page.dart';
 import 'services/student_data_service.dart';
 import 'repositories/course_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
+import 'state/course_state.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -58,13 +58,13 @@ Future<void> main() async {
         ChangeNotifierProvider<CourseProvider>(
           create: (_) => CourseProvider(
             CourseRepository(
-              CourseService(),
+              CourseSupabaseService(),
             ),
           ),
         ),
       ],
       child: const MyApp(),
-    ),
+    )
   );
 }
 

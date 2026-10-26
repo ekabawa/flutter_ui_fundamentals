@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 
 import '../models/course.dart';
-import '../services/course_supabase_service.dart';
+import 'package:provider/provider.dart';
+import '../providers/course_provider.dart';
 
 class CreateCoursePage extends StatefulWidget {
   const CreateCoursePage({super.key});
@@ -17,7 +17,6 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
   final _titleController = TextEditingController();
   final _creditsController = TextEditingController();
 
-  final CourseSupabaseService _service = CourseSupabaseService();
 
   String _status = 'planned';
   bool _isSaving = false;
@@ -30,40 +29,54 @@ class _CreateCoursePageState extends State<CreateCoursePage> {
     super.dispose();
   }
 
-  Future<void> _saveCourse() async {
-    if (!_formKey.currentState!.validate()) return;
+  
+Future<void> _saveCourse() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
+  setState(() => _isSaving = true);
 
-    try {
-      final course = Course(
-        code: _codeController.text.trim(),
-        title: _titleController.text.trim(),
-        credits: int.parse(_creditsController.text.trim()),
-        status: _status,
-      );
+  try {
+    final course = Course(
+      code: _codeController.text.trim(),
+      title: _titleController.text.trim(),
+      credits: int.parse(_creditsController.text.trim()),
+      status: _status,
+    );
 
-      await _service.createCourse(course);
+    final success = await context
+        .read<CourseProvider>()
+        .createCourse(course);
 
-      if (!mounted) return;
+    if (!mounted) return;
 
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course berhasil ditambahkan')),
+        const SnackBar(
+          content: Text('Course berhasil ditambahkan'),
+        ),
       );
 
       Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
-
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyimpan course: $e')),
+        const SnackBar(
+          content: Text('Gagal menyimpan course. Silakan coba lagi.'),
+        ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Gagal menyimpan course: $e')),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => _isSaving = false);
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
