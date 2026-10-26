@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/course_supabase_service.dart';
+import 'create_course_page.dart';
 
 import '../models/course.dart';
 import '../state/course_state.dart';
@@ -39,6 +40,24 @@ class _CoursesPageState extends State<CoursesPage> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Course Explorer v2'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Tambah Course',
+              onPressed: () async {
+                final result = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const CreateCoursePage(),
+                  ),
+                );
+
+                if (result == true && mounted) {
+                  _reloadCourses();
+                }
+              },
+            ),
+          ],
         ),
         body: FutureBuilder<List<Course>>(
           future: coursesFuture,
