@@ -8,6 +8,8 @@ import 'providers/course_provider.dart';
 import 'screens/favorites_page.dart';
 import 'services/student_data_service.dart';
 import 'repositories/course_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/supabase_config.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -39,7 +41,14 @@ final List<Map<String, dynamic>> topics = [
 
 
 
-void main() {
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    publishableKey: SupabaseConfig.supabaseAnonKey,
+  );
   runApp(
     MultiProvider(
       providers: [
