@@ -12,6 +12,8 @@ import 'config/supabase_config.dart';
 import 'state/course_state.dart';
 import 'pages/login_page.dart';
 import 'services/auth_service.dart';
+import 'pages/auth_home_page.dart';
+import 'services/profile_service.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -188,9 +190,9 @@ class MyApp extends StatelessWidget {
       home: AuthService.instance.isLoggedIn
         ? const MainNavigationPage()
         : const LoginPage(),
-
       routes: {
         '/main': (context) => const MainNavigationPage(),
+        '/auth_home': (context) => const AuthHomePage(),
       },
     );
   }
@@ -1009,186 +1011,241 @@ class _NavigationCoursesPageState
   }
 }
 
-class NavigationProfilePage extends StatelessWidget {
+class NavigationProfilePage extends StatefulWidget {
   const NavigationProfilePage({super.key});
 
   @override
+  State<NavigationProfilePage> createState() =>
+      _NavigationProfilePageState();
+}
+
+class _NavigationProfilePageState extends State<NavigationProfilePage> {
+  final ProfileService _profileService = ProfileService();
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _profileService.getMyProfile();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = AuthService.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 24),
+      body: FutureBuilder<UserProfile?>(
+        future: _profileFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-            // Foto profil mahasiswa
-            ClipOval(
-              child: Image.asset(
-                'assets/images/profile.jpg',
-                width: 130,
-                height: 130,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const CircleAvatar(
-                    radius: 65,
-                    backgroundColor: Color(0xFFE3F2FD),
-                    child: Icon(
-                      Icons.person,
-                      size: 70,
-                      color: Color(0xFF1976D2),
-                    ),
-                  );
-                },
-              ),
-            ),
+          final profile = snapshot.data;
 
-            const SizedBox(height: 20),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 24),
 
-            // Judul profil
-            const Text(
-              'Profile Mahasiswa',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Informasi mahasiswa
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFBBDEFB),
-                ),
-              ),
-              child: const Column(
-                children: [
-                  Icon(
-                    Icons.school,
-                    size: 32,
-                    color: Color(0xFF1976D2),
-                  ),
-
-                  SizedBox(height: 12),
-
-                  Text(
-                    'I Putu Eka Bawa Utama',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    'NIM: 2415051008',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    'PTI 5A',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Tombol menuju halaman feedback
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const FeedbackFormPage(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.feedback_outlined),
-                label: const Text('Beri Feedback'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1976D2),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Foto profil mahasiswa
+                ClipOval(
+                  child: Image.asset(
+                    'assets/images/profile.jpg',
+                    width: 130,
+                    height: 130,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const CircleAvatar(
+                        radius: 65,
+                        backgroundColor: Color(0xFFE3F2FD),
+                        child: Icon(
+                          Icons.person,
+                          size: 70,
+                          color: Color(0xFF1976D2),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-            // Tombol Logout
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  try {
-                    await AuthService.instance.logout();
+                // Judul profil
+                const Text(
+                  'Profile Mahasiswa',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-                    if (!context.mounted) return;
+                const SizedBox(height: 20),
 
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
+                // Informasi mahasiswa dan akun
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE3F2FD),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFBBDEFB),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.school,
+                        size: 32,
+                        color: Color(0xFF1976D2),
                       ),
-                      (route) => false,
-                    );
-                  } catch (e) {
-                    if (!context.mounted) return;
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Logout gagal: $e'),
+                      const SizedBox(height: 12),
+
+                      Text(
+                        profile?.name.isNotEmpty == true
+                            ? profile!.name
+                            : studentName,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'Email: ${profile?.email.isNotEmpty == true ? profile!.email : (user?.email ?? 'Email tidak tersedia')}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'Role: ${profile?.roleLabel ?? 'Role tidak tersedia'}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1976D2),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        'NIM: $studentId',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        'PTI 5A',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+
+                const SizedBox(height: 24),
+
+                // Tombol menuju halaman feedback
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const FeedbackFormPage(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.feedback_outlined),
+                    label: const Text('Beri Feedback'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1976D2),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Tombol Logout
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await AuthService.instance.logout();
+
+                        if (!context.mounted) return;
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false,
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Logout gagal: $e'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Logout'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

@@ -13,15 +13,21 @@ class AuthService {
 
   bool get isLoggedIn => currentSession != null;
 
-  Future<AuthResponse> register({
-    required String email,
-    required String password,
-  }) {
-    return _client.auth.signUp(
-      email: email,
-      password: password,
-    );
-  }
+Future<AuthResponse> register({
+  required String email,
+  required String password,
+  required String name,
+  String role = 'student',
+}) {
+  return _client.auth.signUp(
+    email: email,
+    password: password,
+    data: {
+      'name': name,
+      'role': role,
+    },
+  );
+}
 
   Future<AuthResponse> login({
     required String email,
