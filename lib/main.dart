@@ -10,6 +10,7 @@ import 'repositories/course_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'state/course_state.dart';
+import 'pages/login_page.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -183,7 +184,11 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: const MainNavigationPage(),
+      home: const LoginPage(),
+
+      routes: {
+        '/main': (context) => const MainNavigationPage(),
+      },
     );
   }
 }
