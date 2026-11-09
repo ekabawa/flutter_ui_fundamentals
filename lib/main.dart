@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'state/course_state.dart';
 import 'pages/login_page.dart';
+import 'services/auth_service.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -184,7 +185,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: const LoginPage(),
+      home: AuthService.instance.isLoggedIn
+        ? const MainNavigationPage()
+        : const LoginPage(),
 
       routes: {
         '/main': (context) => const MainNavigationPage(),
@@ -1140,13 +1143,56 @@ class NavigationProfilePage extends StatelessWidget {
                 ),
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            // Tombol Logout
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  try {
+                    await AuthService.instance.logout();
+
+                    if (!context.mounted) return;
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                      (route) => false,
+                    );
+                  } catch (e) {
+                    if (!context.mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Logout gagal: $e'),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 
 class DetailPage extends StatelessWidget {
