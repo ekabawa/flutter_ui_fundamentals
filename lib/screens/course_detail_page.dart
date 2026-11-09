@@ -6,8 +6,10 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../state/course_state.dart';
 import 'edit_course_page.dart';
+import '../services/profile_service.dart';
+import '../widgets/role_guard.dart';
 
-class CourseDetailPage extends StatelessWidget {
+class CourseDetailPage extends StatefulWidget {
   final Course course;
 
   const CourseDetailPage({
@@ -16,9 +18,23 @@ class CourseDetailPage extends StatelessWidget {
   });
 
   @override
+  State<CourseDetailPage> createState() => _CourseDetailPageState();
+}
+
+class _CourseDetailPageState extends State<CourseDetailPage> {
+  final ProfileService _profileService = ProfileService();
+  late Future<UserProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _profileService.getMyProfile();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<CourseState>();
-    final isFavorite = provider.isFavorite(course.code);
+    final isFavorite = provider.isFavorite(widget.course.code);
 
     return Scaffold(
       appBar: AppBar(
@@ -41,7 +57,7 @@ class CourseDetailPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             Text(
-              course.title,
+              widget.course.title,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -50,19 +66,19 @@ class CourseDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             Text(
-              'Kode: ${course.code}',
+              'Kode: ${widget.course.code}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
 
             Text(
-              'SKS: ${course.credits}',
+              'SKS: ${widget.course.credits}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 8),
 
             Text(
-              'Status: ${course.status}',
+              'Status: ${widget.course.status}',
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 24),
@@ -74,7 +90,7 @@ class CourseDetailPage extends StatelessWidget {
                 onPressed: () {
                   context
                       .read<CourseState>()
-                      .toggleFavorite(course.code);
+                      .toggleFavorite(widget.course.code);
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -99,46 +115,67 @@ class CourseDetailPage extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            // Tombol Edit Course (Khusus Instructor)
+            FutureBuilder<UserProfile?>(
+              future: _profileFuture,
+              builder: (context, snapshot) {
+                final role = snapshot.data?.role;
+                return RoleGuard(
+                  role: role,
+                  allowed: const ['instructor'],
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: widget.course.id == null
+                              ? null
+                              : () async {
+                                  final updated =
+                                      await Navigator.push<bool>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => EditCoursePage(
+                                        course: widget.course,
+                                      ),
+                                    ),
+                                  );
 
-            // Tombol Edit Course
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: course.id == null
-                    ? null
-                    : () async {
-                        final updated =
-                            await Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditCoursePage(
-                              course: course,
-                            ),
-                          ),
-                        );
+                                  if (!context.mounted) return;
 
-                        if (!context.mounted) return;
-
-                        if (updated == true) {
-                          Navigator.pop(context, true);
-                        }
-                      },
-                icon: const Icon(Icons.edit),
-                label: const Text('Edit Course'),
-              ),
+                                  if (updated == true) {
+                                    Navigator.pop(context, true);
+                                  }
+                                },
+                          icon: const Icon(Icons.edit),
+                          label: const Text('Edit Course'),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 12),
-
-            // Tombol Hapus Course
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
+            // Tombol Hapus Course (Khusus Instructor)
+            FutureBuilder<UserProfile?>(
+              future: _profileFuture,
+              builder: (context, snapshot) {
+                final role = snapshot.data?.role;
+                return RoleGuard(
+                  role: role,
+                  allowed: const ['instructor'],
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                onPressed: course.id == null
+                onPressed: widget.course.id == null
                     ? null
                     : () async {
                         final confirm =
@@ -149,7 +186,7 @@ class CourseDetailPage extends StatelessWidget {
                             title: const Text('Hapus Course?'),
                             content: Text(
                               'Apakah Anda yakin ingin menghapus '
-                              '${course.title}?',
+                              '${widget.course.title}?',
                             ),
                             actions: [
                               TextButton(
@@ -182,7 +219,7 @@ class CourseDetailPage extends StatelessWidget {
                         try {
                           final success = await context
                               .read<CourseProvider>()
-                              .deleteCourse(course.id!);
+                              .deleteCourse(widget.course.id!);
 
                           if (!context.mounted) return;
 
@@ -224,6 +261,11 @@ class CourseDetailPage extends StatelessWidget {
                 icon: const Icon(Icons.delete),
                 label: const Text('Hapus Course'),
               ),
+            ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
 

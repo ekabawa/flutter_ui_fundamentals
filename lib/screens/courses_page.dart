@@ -7,6 +7,8 @@ import '../models/course.dart';
 import '../state/course_state.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
+import '../services/profile_service.dart';
+import '../widgets/role_guard.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});
@@ -16,9 +18,13 @@ State<CoursesPage> createState() => _CoursesPageState();
 }
 
 class _CoursesPageState extends State<CoursesPage> {
+  final ProfileService _profileService = ProfileService();
+  late Future<UserProfile?> _profileFuture;
+
   @override
   void initState() {
     super.initState();
+    _profileFuture = _profileService.getMyProfile();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -39,20 +45,29 @@ class _CoursesPageState extends State<CoursesPage> {
         appBar: AppBar(
           title: const Text('Course Explorer v2'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              tooltip: 'Tambah Course',
-              onPressed: () async {
-                final result = await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const CreateCoursePage(),
+            FutureBuilder<UserProfile?>(
+              future: _profileFuture,
+              builder: (context, snapshot) {
+                return RoleGuard(
+                  role: snapshot.data?.role,
+                  allowed: const ['instructor'],
+                  child: IconButton(
+                    icon: const Icon(Icons.add),
+                    tooltip: 'Tambah Course',
+                    onPressed: () async {
+                      final result = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CreateCoursePage(),
+                        ),
+                      );
+
+                      if (result == true && mounted) {
+                        _reloadCourses();
+                      }
+                    },
                   ),
                 );
-
-                if (result == true && mounted) {
-                  _reloadCourses();
-                }
               },
             ),
           ],
