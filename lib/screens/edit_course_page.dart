@@ -55,6 +55,7 @@ Future<void> _saveCourse() async {
       title: _titleController.text.trim(),
       credits: int.parse(_creditsController.text.trim()),
       status: _status,
+      ownerId: widget.course.ownerId,
     );
 
     final success = await context
@@ -72,11 +73,12 @@ Future<void> _saveCourse() async {
 
       Navigator.pop(context, true);
     } else {
+      final errorMsg = context.read<CourseProvider>().error ??
+          'Gagal memperbarui course. Anda tidak memiliki izin atau course bukan milik Anda.';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Gagal memperbarui course. Silakan coba lagi.',
-          ),
+        SnackBar(
+          content: Text(errorMsg),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -86,6 +88,7 @@ Future<void> _saveCourse() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Gagal memperbarui course: $e'),
+        backgroundColor: Colors.red,
       ),
     );
   } finally {

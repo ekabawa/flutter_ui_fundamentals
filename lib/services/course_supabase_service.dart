@@ -22,8 +22,15 @@ class CourseSupabaseService {
   }
 
   Future<void> createCourse(Course course) async {
+    final user = _supabase.auth.currentUser;
     final data = course.toJson();
     data.remove('id');
+
+    if (course.ownerId != null && course.ownerId!.isNotEmpty) {
+      data['owner_id'] = course.ownerId;
+    } else if (user != null) {
+      data['owner_id'] = user.id;
+    }
 
     await _supabase
         .from('courses')
@@ -31,27 +38,33 @@ class CourseSupabaseService {
   }
 
   
-Future<void> updateCourse(Course course) async {
-  if (course.id == null) {
-    throw ArgumentError('ID course tidak boleh kosong.');
+  Future<bool> updateCourse(Course course) async {
+    if (course.id == null) {
+      throw ArgumentError('ID course tidak boleh kosong.');
+    }
+
+    final response = await _supabase
+        .from('courses')
+        .update({
+          'code': course.code,
+          'title': course.title,
+          'credits': course.credits,
+          'status': course.status,
+        })
+        .eq('id', course.id!)
+        .select();
+
+    return (response as List).isNotEmpty;
   }
 
-  await _supabase
-      .from('courses')
-      .update({
-        'code': course.code,
-        'title': course.title,
-        'credits': course.credits,
-        'status': course.status,
-      })
-      .eq('id', course.id!);
-}
-
-Future<void> deleteCourse(int id) async {
-    await _supabase
+  Future<bool> deleteCourse(int id) async {
+    final response = await _supabase
         .from('courses')
         .delete()
-        .eq('id', id);
-}
+        .eq('id', id)
+        .select();
+
+    return (response as List).isNotEmpty;
+  }
 
 }

@@ -235,13 +235,13 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
                             Navigator.pop(context, true);
                           } else {
+                            final errorMsg = context.read<CourseProvider>().error ??
+                                'Gagal menghapus course. Anda tidak memiliki izin atau course bukan milik Anda.';
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Gagal menghapus course. '
-                                  'Silakan coba lagi.',
-                                ),
+                              SnackBar(
+                                content: Text(errorMsg),
+                                backgroundColor: Colors.red,
                               ),
                             );
                           }
@@ -254,6 +254,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               content: Text(
                                 'Gagal menghapus course: $e',
                               ),
+                              backgroundColor: Colors.red,
                             ),
                           );
                         }

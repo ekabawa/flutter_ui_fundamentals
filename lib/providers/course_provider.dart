@@ -42,9 +42,15 @@ class CourseProvider extends ChangeNotifier {
 
   Future<bool> updateCourse(Course course) async {
     try {
-      await repository.updateCourse(course);
-      await loadCourses();
-      return true;
+      final success = await repository.updateCourse(course);
+      if (success) {
+        await loadCourses();
+        return true;
+      }
+      error =
+          'Gagal memperbarui course. Anda tidak memiliki izin atau course bukan milik Anda.';
+      notifyListeners();
+      return false;
     } catch (e) {
       error = e.toString();
       notifyListeners();
@@ -54,9 +60,15 @@ class CourseProvider extends ChangeNotifier {
 
   Future<bool> deleteCourse(int id) async {
     try {
-      await repository.deleteCourse(id);
-      await loadCourses();
-      return true;
+      final success = await repository.deleteCourse(id);
+      if (success) {
+        await loadCourses();
+        return true;
+      }
+      error =
+          'Gagal menghapus course. Anda tidak memiliki izin atau course bukan milik Anda.';
+      notifyListeners();
+      return false;
     } catch (e) {
       error = e.toString();
       notifyListeners();

@@ -15,11 +15,11 @@ class CourseRepository {
     return service.createCourse(course);
   }
 
-  Future<void> updateCourse(Course course) {
+  Future<bool> updateCourse(Course course) {
     return service.updateCourse(course);
   }
 
-  Future<void> deleteCourse(int id) {
+  Future<bool> deleteCourse(int id) {
     return service.deleteCourse(id);
   }
 }

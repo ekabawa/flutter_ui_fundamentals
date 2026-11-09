@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/course.dart';
 import 'package:provider/provider.dart';
 import '../providers/course_provider.dart';
+import '../services/auth_service.dart';
 
 class CreateCoursePage extends StatefulWidget {
   const CreateCoursePage({super.key});
@@ -36,11 +37,13 @@ Future<void> _saveCourse() async {
   setState(() => _isSaving = true);
 
   try {
+    final user = AuthService.instance.currentUser;
     final course = Course(
       code: _codeController.text.trim(),
       title: _titleController.text.trim(),
       credits: int.parse(_creditsController.text.trim()),
       status: _status,
+      ownerId: user?.id,
     );
 
     final success = await context
