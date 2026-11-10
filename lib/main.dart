@@ -17,6 +17,7 @@ import 'services/profile_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -48,7 +49,6 @@ final List<Map<String, dynamic>> topics = [
 
 
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -56,9 +56,13 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
 
   // Inisialisasi Firebase Cloud Messaging
-  await NotificationService().initialize();
+  
 
   // Inisialisasi Supabase
   await Supabase.initialize(
@@ -167,8 +171,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+        return MaterialApp(
       debugShowCheckedModeBanner: false,
+
+      // Key untuk menampilkan SnackBar dari NotificationService
+      scaffoldMessengerKey: messengerKey,
 
       theme: ThemeData(
         useMaterial3: true,
@@ -201,8 +208,9 @@ class MyApp extends StatelessWidget {
       ),
 
       home: AuthService.instance.isLoggedIn
-        ? const MainNavigationPage()
-        : const LoginPage(),
+          ? const MainNavigationPage()
+          : const LoginPage(),
+
       routes: {
         '/main': (context) => const MainNavigationPage(),
         '/auth_home': (context) => const AuthHomePage(),
