@@ -14,6 +14,9 @@ import 'pages/login_page.dart';
 import 'services/auth_service.dart';
 import 'pages/auth_home_page.dart';
 import 'services/profile_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'services/notification_service.dart';
 
 const String studentName = 'I Putu Eka Bawa Utama';
 const String studentId = '2415051008';
@@ -49,10 +52,20 @@ final List<Map<String, dynamic>> topics = [
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inisialisasi Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Inisialisasi Firebase Cloud Messaging
+  await NotificationService().initialize();
+
+  // Inisialisasi Supabase
   await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
+
   runApp(
     MultiProvider(
       providers: [
